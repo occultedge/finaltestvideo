@@ -127,14 +127,17 @@
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
             border-radius: 10px;
-            margin-top: 20px;
-            height: 200px;
+            margin: 20px 0; /* Increased margin for spacing */
+            /* Removed fixed height to allow dynamic resizing */
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
         }
 
         #messages {
-            height: 120px;
+            flex: 1; /* Allow messages to take up available space */
             padding: 10px;
-            overflow-y: scroll;
+            overflow-y: auto;
             background-color: #f9f9f9;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -159,7 +162,8 @@
         #inputArea {
             display: flex;
             margin-top: 10px;
-            margin-bottom:30px;
+            /* Added flex-shrink to prevent overlapping */
+            flex-shrink: 0;
         }
 
         #inputArea input {
@@ -169,6 +173,7 @@
             border-radius: 5px;
             border: 1px solid #ccc;
             margin-right: 10px;
+            box-sizing: border-box;
         }
 
         #inputArea button {
@@ -180,6 +185,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            flex-shrink: 0;
         }
 
         #inputArea button:hover {
@@ -215,6 +221,7 @@
             margin: 10px 0;
             border-radius: 5px;
             border: 1px solid #ccc;
+            box-sizing: border-box;
         }
 
         .login-container button {
@@ -253,7 +260,8 @@
             }
 
             #chatbox {
-                height: 150px;
+                /* Adjust margin for smaller screens */
+                margin: 20px 0;
             }
 
             .login-container {
@@ -272,7 +280,8 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 90%;
             max-width: 1200px;
-            margin-top: 20px;
+            margin: 20px 0; /* Added margin for spacing */
+            box-sizing: border-box;
         }
 
         .course-content h1, .course-content h2, .course-content h3 {
@@ -326,7 +335,7 @@
         </div>
     </div>
 
-    <div style="margin-top: 40px;"></div>
+    <!-- Removed unnecessary spacing div -->
 
     <!-- Course Content Section -->
     <div class="course-content">
@@ -598,4 +607,3 @@
     </script>
 </body>
 </html>
-
