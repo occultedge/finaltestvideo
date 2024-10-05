@@ -1,0 +1,540 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Video & Chat with Assistant</title>
+    <style>
+        /* General Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #eef2f7;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Video Container */
+        .video-container {
+            background-color: #fff;
+            padding: 0;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 0;
+            width: 100%; 
+            margin-top: 20px;
+            margin-bottom: 800px;
+            justify-content: center;
+            height: 500vh; /* Increased height for more vertical space */
+        }
+
+        /* Set the dimensions for the player */
+        #player {
+            width: 100%; 
+            height: 500%; /* Adjusted height to match the increased container size */
+        }
+
+        /* Permanent overlay to prevent interaction with YouTube */
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.1);
+            z-index: 2;
+        }
+
+        /* Blackout overlay for when the video is paused or ad is playing */
+        .blackout {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 1);
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            display: none;
+        }
+
+        /* Controls placed below the video container */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            width: 90%;
+            flex-wrap: wrap;
+        }
+
+        .controls button {
+            font-size: 16px;
+            padding: 10px;
+            cursor: pointer;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        .time-display {
+            font-size: 16px;
+            margin-left: 10px;
+            margin-top: 10px;
+        }
+
+        /* Chatbox Styling */
+        #chatbox {
+            width: 90%;
+            background-color: #fff;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            height: 200px;
+        }
+
+        #messages {
+            height: 120px;
+            padding: 10px;
+            overflow-y: scroll;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .message {
+            margin: 10px 0;
+        }
+
+        .user {
+            text-align: right;
+            color: blue;
+        }
+
+        .bot {
+            text-align: left;
+            color: green;
+        }
+
+        /* Chat input styling */
+        #inputArea {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        #inputArea input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+
+        #inputArea button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #inputArea button:hover {
+            background-color: #218838;
+        }
+
+        /* Login Overlay */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 50px;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            width: 600px;
+            text-align: center;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .login-container button {
+            padding: 12px;
+            width: 100%;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+        }
+
+        .login-container button:hover {
+            background-color: #218838;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+
+        /* Responsive for smaller screens */
+        @media only screen and (max-width: 768px) {
+            #player {
+                height: 50vh; /* Adjusted for smaller screens */
+            }
+
+            .controls button {
+                font-size: 14px;
+                margin-right: 5px;
+                padding: 8px;
+            }
+
+            #chatbox {
+                height: 150px;
+            }
+
+            .login-container {
+                width: 90%;
+            }
+        }
+
+        /* Course Content Styling */
+        .course-content {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding: 20px;
+            background: linear-gradient(135deg, #f0f8ff, #e6e6fa);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            margin-top: 20px;
+        }
+
+        .course-content h1, .course-content h2, .course-content h3 {
+            color: #2e8b57;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay">
+        <div class="login-container">
+            <h2>Login</h2>
+            <input type="text" id="username" placeholder="Enter Username" required>
+            <input type="password" id="password" placeholder="Enter Password" required>
+            <button onclick="login()">Login</button>
+            <p id="error" class="error"></p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="video-container">
+        <div id="player"></div>
+        <div id="videoOverlay" class="video-overlay"></div> <!-- Transparent overlay always active -->
+        <div id="blackout" class="blackout">Loading...</div> <!-- Blackout overlay for when the video is paused or ad is playing -->
+    </div>
+
+    <!-- Controls below the video container -->
+    <div class="controls" id="controlsContainer">
+        <button id="playButton">Play</button>
+        <button id="pauseButton">Pause</button>
+        <button id="rewindButton">-10s</button>
+        <button id="forwardButton">+10s</button>
+        <button id="muteButton">Mute</button>
+        <button id="unmuteButton">Unmute</button>
+        <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+    </div>
+
+    <!-- Chatbot Section -->
+    <div id="chatbox">
+        <h2>Student Assistant</h2>
+        <div id="messages">
+            <!-- Initial bot response -->
+            <div class="message bot">
+                Hi I am Occultedge chatbot, ask me all your doubts that may arise while watching the video.
+            </div>
+        </div>
+        <div id="inputArea">
+            <input type="text" id="userInput" placeholder="Type your message here..." />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px;"></div>
+
+    <!-- Course Content Section -->
+    <div class="course-content">
+        <!-- Lesson 1: IT Training Course Summary for Nursing Students -->
+        <h1>🩺 Lesson 1: Introduction to IT Training for Nurses</h1>
+        <p>
+            Welcome to the first lesson of our comprehensive IT Training Course tailored specifically for nursing professionals. 
+            In today's healthcare environment, possessing essential computer skills is crucial for efficient patient care, 
+            documentation, and communication. This free 12-hour training program encompasses five key Microsoft applications, 
+            each designed to enhance your technological proficiency in a medical setting.
+        </p>
+        <h2>🗓️ Course Schedule: Weeks 1 & 2</h2>
+        <h3>📅 Week 1: Documenting and Analyzing Data</h3>
+        <ul>
+            <li>✔️ <strong>Microsoft Word:</strong> Master the fundamentals of word processing to create and manage patient records, reports, and official documentation efficiently.</li>
+            <li>✔️ <strong>Microsoft Excel:</strong> Learn to handle spreadsheets, perform data analysis, and create informative charts for tracking patient data and managing schedules.</li>
+            <li>✔️ <strong>Microsoft PowerPoint:</strong> Develop skills to design effective presentations for patient education, staff meetings, and training sessions.</li>
+        </ul>
+
+        <h3>📅 Week 2: Communication and System Navigation</h3>
+        <ul>
+            <li>✔️ <strong>Microsoft Outlook:</strong> Gain proficiency in managing emails, calendars, and organizing tasks to maintain efficient communication within healthcare teams.</li>
+            <li>✔️ <strong>Windows 11:</strong> Familiarize yourself with the latest operating system, including file management, system navigation, and utilizing healthcare-specific software applications.</li>
+        </ul>
+
+        <h2>🎯 Course Benefits</h2>
+        <ul>
+            <li>➤ Enhance your documentation and communication skills essential for patient care and interdepartmental collaboration.</li>
+            <li>➤ Improve data management and analysis capabilities for better patient tracking and resource allocation.</li>
+            <li>➤ Develop effective presentation skills to educate patients and conduct training sessions for healthcare staff.</li>
+            <li>➤ Gain familiarity with the latest operating systems to stay updated with current healthcare technologies.</li>
+        </ul>
+
+        <div style="text-align: center; margin-top: 30px;">
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: #ffffff; border-left: 5px solid #2e8b57; border-radius: 5px;">
+            <h2>📝 Assignments for Weeks 1 & 2</h2>
+            <p>To reinforce your understanding of the course material, please complete the following assignments tailored for nursing professionals:</p>
+
+            <h3>📅 Week 1 Assignments</h3>
+            <ul>
+                <li>• <strong>Microsoft Word:</strong> Create a detailed patient intake form that includes sections for patient information, medical history, and current medications.</li>
+                <li>• <strong>Microsoft Excel:</strong> Develop a spreadsheet to track patient appointments, including columns for patient names, appointment dates, times, and healthcare providers.</li>
+                <li>• <strong>Microsoft PowerPoint:</strong> Design a 5-slide presentation on "Effective Communication in Nursing" to be used in a staff meeting.</li>
+            </ul>
+
+            <h3>📅 Week 2 Assignments</h3>
+            <ul>
+                <li>• <strong>Microsoft Outlook:</strong> Set up an email template for patient follow-ups and schedule a recurring weekly team meeting using the calendar feature.</li>
+                <li>• <strong>Windows 11:</strong> Customize your desktop by organizing folders for different departments, creating shortcuts for frequently used applications, and managing user permissions.</li>
+            </ul>
+
+            <p>Please submit your completed assignments through the designated submission portal by the end of each week.</p>
+        </div>
+    </div>
+
+    <!-- Load YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        const validUsers = ['rohit', 'utkarsh', 'anita', 'arunima', 'sachitr'];
+
+        // Function to handle login
+        function login() {
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const password = document.getElementById('password').value.trim().toLowerCase();
+            const error = document.getElementById('error');
+
+            if (validUsers.includes(username) && username === password) {
+                document.getElementById('loginOverlay').style.display = 'none'; // Hide login overlay
+            } else {
+                error.textContent = "Invalid Username or Password!";
+            }
+        }
+
+        // Variables to hold the player and control buttons
+        let player;
+        let playButton = document.getElementById('playButton');
+        let pauseButton = document.getElementById('pauseButton');
+        let rewindButton = document.getElementById('rewindButton');
+        let forwardButton = document.getElementById('forwardButton');
+        let muteButton = document.getElementById('muteButton');
+        let unmuteButton = document.getElementById('unmuteButton');
+        let timeDisplay = document.getElementById('timeDisplay');
+        let blackout = document.getElementById('blackout');
+        let videoOverlay = document.getElementById('videoOverlay');
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                videoId: 'hPEgaVN1Mpg', // Replace with your video ID
+                playerVars: {
+                    'autoplay': 0, 
+                    'controls': 0,
+                    'cc_load_policy': 1, // Turn on captions
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'mute': 1 // Start muted for the ad
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange 
+                }
+            });
+        }
+
+        // Function to handle player events when the player is ready
+        function onPlayerReady(event) {
+            document.getElementById('controlsContainer').style.display = 'flex';
+
+            playButton.addEventListener('click', function() {
+                player.unMute(); // Unmute after ad
+                blackout.style.display = 'none'; // Hide blackout when playing
+                videoOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'; // Light transparent overlay
+                player.playVideo();
+            });
+
+            pauseButton.addEventListener('click', function() {
+                blackout.style.display = 'block'; // Show blackout on pause
+                videoOverlay.style.backgroundColor = 'rgba(0, 0, 0, 1)'; // Full opaque on pause
+                player.pauseVideo();
+            });
+
+            rewindButton.addEventListener('click', function() {
+                let currentTime = player.getCurrentTime();
+                player.seekTo(currentTime - 10, true);
+            });
+
+            forwardButton.addEventListener('click', function() {
+                let currentTime = player.getCurrentTime();
+                player.seekTo(currentTime + 10, true);
+            });
+
+            // Mute functionality
+            muteButton.addEventListener('click', function() {
+                player.mute();
+            });
+
+            // Unmute functionality
+            unmuteButton.addEventListener('click', function() {
+                player.unMute();
+            });
+
+            setInterval(function() {
+                let currentTime = player.getCurrentTime();
+                let duration = player.getDuration();
+                timeDisplay.innerText = formatTime(currentTime) + ' / ' + formatTime(duration);
+            }, 1000);
+        }
+
+        function formatTime(seconds) {
+            let minutes = Math.floor(seconds / 60);
+            let secs = Math.floor(seconds % 60);
+            return minutes + ':' + (secs < 10 ? '0' + secs : secs);
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PAUSED) {
+                blackout.style.display = 'block'; // Show blackout when paused
+                videoOverlay.style.backgroundColor = 'rgba(0, 0, 0, 1)'; // Opaque while paused
+            } else if (event.data === YT.PlayerState.BUFFERING) {
+                // Show loading and mute during the ad
+                blackout.style.display = 'flex'; // Show blackout with "Loading..."
+                player.mute(); // Mute while buffering (during ads)
+            } else {
+                blackout.style.display = 'none'; // Hide blackout when playing
+                videoOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'; // Light transparent overlay while playing
+            }
+        }
+
+        // Chatbot Functionality with Together API
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput').value.trim();
+            if (userInput === "") return;
+
+            appendMessage(userInput, 'user');
+            document.getElementById('userInput').value = '';
+
+            const response = await getBotResponse(userInput);
+            appendMessage(response, 'bot');
+        }
+
+        function appendMessage(message, sender) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${sender}`;
+            messageElement.innerHTML = formatBotResponse(message); // Handle formatting
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        async function getBotResponse(message) {
+            const apiKey = '45759dbbae48d21cb792051045108d7c315a8834fd2b28359fef4dabcbc093ae'; // Together AI API key
+            const apiUrl = 'https://api.together.xyz/chat/completions'; 
+
+            const prompt = `
+                You are an AI assistant of a company: "OccultEdge" who answers queries of students. Be professional and to the point.\nSTUDENT QUERY: "${message}"
+            `;
+
+            const data = {
+                model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 300,
+                temperature: 0.1
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                return result.choices[0].message.content.trim();
+            } catch (error) {
+                console.error('Error:', error);
+                return "Sorry, there was an error processing your request.";
+            }
+        }
+
+        // Function to handle **bold** and \n (newline) formatting
+        function formatBotResponse(response) {
+            const formatted = response
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Replace **bold** with <strong>
+                .replace(/\n/g, '<br>'); // Replace \n with <br> for line breaks
+            return formatted;
+        }
+
+        function appendMessage(message, sender) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${sender}`;
+            messageElement.textContent = message;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
+
