@@ -303,7 +303,7 @@
 
     <!-- Main Content -->
     <div class="video-container">
-        
+
         <div id="player"></div>
         <div id="videoOverlay" class="video-overlay"></div> <!-- Permanent Overlay -->
         <div id="initialOverlay" class="initial-overlay"></div> <!-- Initial Black Overlay -->
@@ -320,6 +320,9 @@
         <button id="unmuteButton" aria-label="Unmute Video">Unmute</button>
         <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
     </div>
+<div class="slider-container" style="width: 75%; margin-top: 20px;">
+    <input type="range" id="timeSlider" min="0" max="100" value="0" step="1" style="width: 100%;" />
+</div>
 
     <!-- Chatbot Section -->
     <div id="chatbox">
@@ -341,56 +344,11 @@
     <!-- Course Content Section -->
     <div class="course-content">
         <!-- Lesson 1: IT Training Course Summary for Nursing Students -->
-        <h1>🩺 Lesson 1: Introduction to IT Training for Nurses</h1>
+        <h1>🩺 Lesson 1: Demo of Lecture </h1>
         <p>
-            Welcome to the first lesson of our comprehensive IT Training Course tailored specifically for nursing professionals. 
-            In today's healthcare environment, possessing essential computer skills is crucial for efficient patient care, 
-            documentation, and communication. This tutorial  encompasses five key Microsoft applications, 
-            each designed to enhance your technological proficiency.  
+            This is demo lecture by Your Indian  Professor .  
         </p>
-        <h2>🗓️ Course Schedule: Weeks 1 & 2</h2>
-        <h3>📅 Week 1: Documenting and Analyzing Data</h3>
-        <ul>
-            <li>✔️ <strong>Microsoft Word:</strong> Master the fundamentals of word processing to create and manage patient records, reports, and official documentation efficiently.</li>
-            <li>✔️ <strong>Microsoft Excel:</strong> Learn to handle spreadsheets, perform data analysis, and create informative charts for tracking patient data and managing schedules.</li>
-            <li>✔️ <strong>Microsoft PowerPoint:</strong> Develop skills to design effective presentations for patient education, staff meetings, and training sessions.</li>
-        </ul>
-
-        <h3>📅 Week 2: Communication and System Navigation</h3>
-        <ul>
-            <li>✔️ <strong>Microsoft Outlook:</strong> Gain proficiency in managing emails, calendars, and organizing tasks to maintain efficient communication within healthcare teams.</li>
-            <li>✔️ <strong>Windows 11:</strong> Familiarize yourself with the latest operating system, including file management, system navigation, and utilizing healthcare-specific software applications.</li>
-        </ul>
-
-        <h2>🎯 Course Benefits</h2>
-        <ul>
-            <li>➤ Enhance your documentation and communication skills essential for patient care and interdepartmental collaboration.</li>
-            <li>➤ Improve data management and analysis capabilities for better patient tracking and resource allocation.</li>
-            <li>➤ Develop effective presentation skills.</li>
-            <li>➤ Gain familiarity with the latest operating systems to stay updated with current healthcare technologies.</li>
-        </ul>
-
-        <div style="text-align: center; margin-top: 30px;">
-        </div>
-
-        <div style="margin-top: 40px; padding: 20px; background: #ffffff; border-left: 5px solid #2e8b57; border-radius: 5px;">
-            <h2>📝 Assignments for Weeks 1 & 2</h2>
-            <p>To reinforce your understanding of the course material, please complete the following assignments tailored for nursing professionals:</p>
-
-            <h3>📅 Week 1 Assignments</h3>
-            <ul>
-                <li>• <strong>Microsoft Word:</strong> Create a detailed patient intake form that includes sections for patient information, medical history, and current medications.</li>
-                <li>• <strong>Microsoft Excel:</strong> Develop a spreadsheet to track patient appointments, including columns for patient names, appointment dates, times, and healthcare providers.</li>
-                <li>• <strong>Microsoft PowerPoint:</strong> Design a 5-slide presentation on "Effective Communication in Nursing" to be used in a staff meeting.</li>
-            </ul>
-
-            <h3>📅 Week 2 Assignments</h3>
-            <ul>
-                <li>• <strong>Microsoft Outlook:</strong> Set up an email template for patient follow-ups and schedule a recurring weekly team meeting using the calendar feature.</li>
-
-            <p>Please submit your completed assignments through the designated submission portal by the end of each week.</p>
-        </div>
-    </div>
+        <h2>🗓️ Full Course soon</h2>
 
     <!-- Load YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
@@ -521,7 +479,34 @@
                 blackout.style.display = 'flex'; // Show blackout when paused
                 videoOverlay.style.backgroundColor = 'rgba(0, 0, 0, 1)'; // Opaque while paused
             } else if (event.data === YT.PlayerState.BUFFERING) {
-                // Show loading and mute during buffering
+               // Reference to the time slider
+const timeSlider = document.getElementById('timeSlider');
+
+// Update slider position as the video plays
+player.addEventListener('onStateChange', function(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+        updateSlider();
+    }
+});
+
+function updateSlider() {
+    setInterval(function() {
+        if (player && player.getDuration) {
+            let currentTime = player.getCurrentTime();
+            let duration = player.getDuration();
+            timeSlider.max = duration; // Set the max value of the slider to the video duration
+            timeSlider.value = currentTime; // Update the slider position to current time
+        }
+    }, 1000); // Update slider every second
+}
+
+// Change video time based on slider input
+timeSlider.addEventListener('input', function() {
+    let seekTime = timeSlider.value; 
+    player.seekTo(seekTime, true); // Jump to the selected time
+});
+
+ // Show loading and mute during buffering
                 blackout.style.display = 'flex'; // Show blackout with "Loading..."
                 player.mute(); // Mute while buffering
             } else if (event.data === YT.PlayerState.PLAYING) {
@@ -529,6 +514,7 @@
                 videoOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0)'; // Transparent while playing
             }
         }
+        
 
         // Chatbot Functionality with Together API
         async function sendMessage() {
@@ -603,6 +589,7 @@
                 .replace(/\n/g, '<br>'); // Replace \n with <br> for line breaks
             return formatted;
         }
+        
     </script>
 </body>
 </html>
